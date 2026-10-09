@@ -1,0 +1,51 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+
+application     buoyantPimpleFoam;
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         1;
+deltaT          2.5e-7;
+writeControl    adjustableRunTime;
+writeInterval   5e-5;
+purgeWrite      0;
+writeFormat     ascii;
+writePrecision  8;
+writeCompression off;
+timeFormat      general;
+timePrecision   6;
+runTimeModifiable yes;
+adjustTimeStep  no;
+
+functions
+{
+    // The adapter looks these up at construction, before the solver reads them.
+    loadCoupling
+    {
+        type            readFields;
+        libs            (fieldFunctionObjects);
+        fields          (Qnet Lorentz);
+    }
+
+    probes
+    {
+        type            probes;
+        libs            (fieldFunctionObjects);
+        writeControl    timeStep;
+        writeInterval   5;
+        fields          (T U);
+        probeLocations  ((0.010 0.013 0.00025));
+    }
+
+    preCICE_Adapter
+    {
+        type            preciceAdapterFunctionObject;
+        libs            (preciceAdapterFunctionObject);
+    }
+}

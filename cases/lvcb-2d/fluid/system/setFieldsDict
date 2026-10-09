@@ -1,0 +1,25 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      setFieldsDict;
+}
+
+defaultFieldValues
+(
+    volScalarFieldValue T 300
+);
+
+regions
+(
+    // Molten-bridge channel in the 6 mm contact gap (x = 8..12 mm, y = 10..16 mm).
+    boxToCell
+    {
+        box (0.009 0.010 -1) (0.011 0.016 1);
+        fieldValues
+        (
+            volScalarFieldValue T 12000
+        );
+    }
+);

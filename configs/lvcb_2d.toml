@@ -1,0 +1,59 @@
+# 2D planar low-voltage circuit breaker arc chamber (all lengths in mm, SI otherwise).
+#
+#   y=22 +--------------------------------------------------+
+#        |##### upper runner (fixed contact side, "+") #### |
+#     r  |      [fixed tip]                                 |  v
+#     e  |                          ==== 6 splitter plates  |  e
+#     a  |      [moving tip]        ====  (floating)        |  n
+#     r  |         |  ^ opens down  ====                    |  t
+#        |##### lower runner (moving contact side, "0") ####|
+#   y=0  +--------------------------------------------------+
+#        x=0 (terminals, rear inlet)                      x=50
+name = "lvcb_2d"
+
+[geometry]
+Lx = 50.0
+Ly = 22.0
+h = 0.5
+depth = 10.0
+upper_conductor = [[0, 46, 20, 22], [8, 12, 16, 20]]
+lower_conductor = [[0, 46, 0, 2]]
+plates = [
+  [30, 44, 3.71, 4.71], [30, 44, 6.43, 7.43], [30, 44, 9.14, 10.14],
+  [30, 44, 11.86, 12.86], [30, 44, 14.57, 15.57], [30, 44, 17.29, 18.29],
+]
+vent = [2.0, 20.0]
+vent_left = [2.0, 20.0]  # rear opening behind the contacts: lets the J x B pumping draw in cold air
+moving_x = [8.0, 12.0]
+moving_base = 2.0
+moving_tip_closed = 16.0
+contact_velocity = 5.0
+contact_travel = 6.0
+contact_delay = 0.0
+
+[circuit]
+V_rms = 230.0
+frequency = 50.0
+R = 0.08
+L = 0.9e-3
+current_phase_deg = 20.0
+
+[arc]
+T_ambient = 300.0
+T_ignite = 12000.0
+ignite_width = 2.0
+U_fall = 20.0
+sigma_metal = 1e6
+sigma_floor = 1e-4
+
+[solver]
+t_end = 8e-3
+cfl = 0.4
+potential_every = 5
+output_dt = 5e-5
+B_ext = 0.0
+self_field_scale = 1.0
+radiation = true
+conduction = true
+wall_htc = 3000.0
+write_vtk = true

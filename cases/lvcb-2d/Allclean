@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")"
+rm -rf fluid/constant/polyMesh fluid/postProcessing fluid/dynamicCode fluid/VTK
+find fluid -mindepth 1 -maxdepth 1 -type d -regextype posix-extended -regex '.*/[0-9]+\.?[0-9]*' ! -name 0 -exec rm -rf {} +
+rm -rf em/work mesh/mesh_2d.msh mesh/mesh_gas.msh
+rm -rf precice-run
+rm -f log.foam log.em em/history.csv precice-*.log precice-*-events.json
+rm -f temperature.png waveforms.png
+echo "cleaned"

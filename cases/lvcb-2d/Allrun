@@ -1,0 +1,66 @@
+#!/bin/bash
+# Build the meshes and run the 2D OpenFOAM + Elmer + preCICE coupling.
+# Optional:  ./Allrun mesh     only regenerate the meshes
+#            ./Allrun solve    reuse existing meshes
+set -eo pipefail
+cd "$(dirname "$0")"
+export PATH="${HOME}/.local/bin:${PATH}"
+
+if [[ -f /usr/lib/openfoam/openfoam2606/etc/bashrc ]]; then
+    set +e
+    # shellcheck disable=SC1091
+    source /usr/lib/openfoam/openfoam2606/etc/bashrc
+    set -e
+fi
+if [[ -d /opt/elmer ]]; then
+    export ELMER_HOME=/opt/elmer
+    export PATH="/opt/elmer/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/elmer/lib:${LD_LIBRARY_PATH:-}"
+fi
+
+mode="${1:-all}"
+if [[ "$mode" != "solve" ]]; then
+    python3 mesh/make_mesh.py
+fi
+if [[ "$mode" == "mesh" ]]; then
+    exit 0
+fi
+
+# Drop previous time directories but keep 0/.
+find fluid -mindepth 1 -maxdepth 1 -type d -regextype posix-extended -regex '.*/[0-9]+\.?[0-9]*' ! -name 0 -exec rm -rf {} +
+rm -rf fluid/postProcessing fluid/dynamicCode em/history.csv em/work/em*.vtu em/work/elmermesh/em*.vtu precice-run
+# setFields rewrites 0/T in place; always start from the uniform template so a
+# mesh change does not inherit the previous cell count.
+cp fluid/0/T.initial fluid/0/T
+setFields -case fluid >/dev/null
+
+echo "Starting OpenFOAM (acceptor) and Elmer (connector)"
+set +e
+buoyantPimpleFoam -case fluid > log.foam 2>&1 &
+pid_of=$!
+uv run --project "$(cd ../.. && pwd)" python em/em_participant.py > log.em 2>&1 &
+pid_em=$!
+(
+    while kill -0 "$pid_of" 2>/dev/null && kill -0 "$pid_em" 2>/dev/null; do
+        sleep 1
+    done
+    sleep 3
+    kill "$pid_of" "$pid_em" 2>/dev/null || true
+) &
+pid_watch=$!
+wait "$pid_of"
+status_of=$?
+wait "$pid_em"
+status_em=$?
+kill "$pid_watch" 2>/dev/null || true
+set -e
+echo "OpenFOAM exit ${status_of}, Elmer/preCICE exit ${status_em}"
+echo "---- log.foam (tail) ----"
+tail -n 20 log.foam || true
+echo "---- log.em (tail) ----"
+tail -n 20 log.em || true
+if [[ "$status_of" -ne 0 || "$status_em" -ne 0 ]]; then
+    exit 1
+fi
+uv run --project "$(cd ../.. && pwd)" python plot_results.py
+echo "Done. See temperature.png, waveforms.png and em/history.csv"

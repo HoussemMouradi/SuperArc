@@ -1,0 +1,88 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+
+// Qnet and Lorentz are volume fields the preCICE adapter refreshes once per
+// coupling window. buoyantPimpleFoam calls fvOptions(rho, psi), so the source
+// lives in codeAddSupRho. OpenFOAM stores the RHS with a minus sign.
+jouleSource
+{
+    type            scalarCodedSource;
+    name            jouleSource;
+    scalarCodedSourceCoeffs
+    {
+        selectionMode   all;
+        fields          (h);
+
+        codeInclude
+        #{
+        #};
+
+        codeCorrect
+        #{
+            (void)fld;
+        #};
+
+        codeAddSup
+        #{
+            (void)eqn;
+            (void)fieldi;
+        #};
+
+        codeAddSupRho
+        #{
+            (void)rho;
+            (void)fieldi;
+            const volScalarField& Q = mesh_.lookupObject<volScalarField>("Qnet");
+            eqn.source() -= Q.primitiveField()*mesh_.V();
+        #};
+
+        codeConstrain
+        #{
+            (void)eqn;
+        #};
+    }
+}
+
+lorentzSource
+{
+    type            vectorCodedSource;
+    name            lorentzSource;
+    vectorCodedSourceCoeffs
+    {
+        selectionMode   all;
+        fields          (U);
+
+        codeInclude
+        #{
+        #};
+
+        codeCorrect
+        #{
+            (void)fld;
+        #};
+
+        codeAddSup
+        #{
+            (void)eqn;
+            (void)fieldi;
+        #};
+
+        codeAddSupRho
+        #{
+            (void)rho;
+            (void)fieldi;
+            const volVectorField& F = mesh_.lookupObject<volVectorField>("Lorentz");
+            eqn.source() -= F.primitiveField()*mesh_.V();
+        #};
+
+        codeConstrain
+        #{
+            (void)eqn;
+        #};
+    }
+}

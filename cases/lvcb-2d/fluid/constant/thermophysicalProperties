@@ -1,0 +1,39 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight   28.96;
+    }
+    thermodynamics
+    {
+        // Effective heat capacity. A perfect gas with room-temperature Cp cannot
+        // absorb arc Joule heating; the real enthalpy rise is the dissociation
+        // and ionization stored in the LTE table used on the Elmer side.
+        Cp          50000;
+        Hf          0;
+    }
+    transport
+    {
+        mu          1.8e-05;
+        Pr          0.7;
+    }
+}

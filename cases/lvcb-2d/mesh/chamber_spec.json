@@ -1,0 +1,28 @@
+{
+  "name": "LV circuit-breaker arc chamber",
+  "units": "mm",
+  "note": "Parametric low-voltage breaker arc chamber: switching arc, open contact, splitter plates, external circuit. Lengths are millimetres. The depth scales the planar current to device amperes.",
+  "Lx": 50.0,
+  "Ly": 22.0,
+  "depth": 10.0,
+  "wall": 2.0,
+  "contact_gap": 6.0,
+  "upper_runner": [0.0, 46.0, 20.0, 22.0],
+  "fixed_tip": [8.0, 12.0, 16.0, 20.0],
+  "lower_runner": [0.0, 46.0, 0.0, 2.0],
+  "moving_base": 2.0,
+  "moving_tip_closed": 16.0,
+  "contact_z": [2.0, 8.0],
+  "plates": [
+    [30.0, 44.0, 3.71, 4.71],
+    [30.0, 44.0, 6.43, 7.43],
+    [30.0, 44.0, 9.14, 10.14],
+    [30.0, 44.0, 11.86, 12.86],
+    [30.0, 44.0, 14.57, 15.57],
+    [30.0, 44.0, 17.29, 18.29]
+  ],
+  "plate_z": [0.0, 10.0],
+  "vent_y": [2.0, 20.0],
+  "vent_z": [1.0, 9.0],
+  "terminal_stub": 6.0
+}
